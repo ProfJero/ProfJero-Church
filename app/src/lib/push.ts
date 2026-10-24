@@ -91,6 +91,20 @@ export interface PushSendInput {
   image?: string;
 }
 
-export function sendPush(input: PushSendInput) {
-  return api<{ sent: number; failed: number; removed: number; total: number }>('/v1/push/send', { method: 'POST', json: input });
+interface PushPage { sent: number; failed: number; removed: number; total: number; nextPageToken: string | null }
+
+/** Sends to every device, page by page (the Worker caps work per request). */
+export async function sendPush(input: PushSendInput) {
+  const total = { sent: 0, failed: 0, removed: 0, total: 0 };
+  let pageToken: string | undefined;
+  for (let i = 0; i < 200; i++) {
+    const r = await api<PushPage>('/v1/push/send', { method: 'POST', json: { ...input, pageToken } });
+    total.sent += r.sent;
+    total.failed += r.failed;
+    total.removed += r.removed;
+    total.total += r.total;
+    if (!r.nextPageToken) break;
+    pageToken = r.nextPageToken;
+  }
+  return total;
 }
