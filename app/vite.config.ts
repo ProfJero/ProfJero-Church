@@ -5,7 +5,10 @@ import { VitePWA } from 'vite-plugin-pwa';
 import { fileURLToPath, URL } from 'node:url';
 
 // Christian Worship Centre — Church management PWA. Crafted by ProfJero.
+import pkg from './package.json' with { type: 'json' };
+
 export default defineConfig({
+  define: { __APP_VERSION__: JSON.stringify(pkg.version) },
   resolve: { alias: { '@': fileURLToPath(new URL('./src', import.meta.url)) } },
   plugins: [
     react(),
