@@ -9,7 +9,6 @@ import { telHref, whatsappHref, formatPhone } from '@/lib/phone';
 import { fmtDate, relative, fmtDateTime } from '@/lib/format';
 import { cn, titleCase } from '@/lib/utils';
 import type { CareRequest, CareStatus, CareType } from '@/lib/types';
-import type { BadgeTone } from '@/lib/permissions';
 import { Page, PageHeader } from '@/components/ui/page';
 import { Tabs, TabsContent, TabsList, TabsTrigger, Segmented } from '@/components/ui/tabs';
 import { Card } from '@/components/ui/card';
@@ -20,22 +19,8 @@ import { EmptyState, SkeletonRows } from '@/components/ui/feedback';
 import { Modal } from '@/components/ui/dialog';
 import { Field, Select, Textarea, TextField } from '@/components/ui/input';
 import { CareLogForm, CARE_LOG_TYPES } from './CareLogForm';
+import { CARE_STATUS, CARE_TYPE } from '@/lib/care';
 import { broadcast } from '../messages/PushPanel';
-
-export const CARE_TYPE: Record<CareType, { label: string; tone: BadgeTone }> = {
-  prayer: { label: 'Prayer', tone: 'brand' },
-  counselling: { label: 'Counselling', tone: 'info' },
-  visit: { label: 'Visitation', tone: 'gold' },
-  urgent: { label: 'Urgent', tone: 'danger' },
-  thanksgiving: { label: 'Thanksgiving', tone: 'success' },
-};
-export const CARE_STATUS: Record<CareStatus, { label: string; tone: BadgeTone }> = {
-  new: { label: 'New', tone: 'brand' },
-  in_progress: { label: 'In progress', tone: 'warning' },
-  scheduled: { label: 'Scheduled', tone: 'info' },
-  completed: { label: 'Completed', tone: 'success' },
-  closed: { label: 'Closed', tone: 'neutral' },
-};
 
 export default function AdminCare() {
   const [params, setParams] = useSearchParams();

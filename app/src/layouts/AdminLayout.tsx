@@ -136,7 +136,9 @@ export default function AdminLayout() {
   const online = useOnline();
   const { user } = useAuth();
 
-  useEffect(() => setDrawer(false), [location.pathname]);
+  useEffect(() => {
+    setDrawer(false);
+  }, [location.pathname]);
   useEffect(() => {
     if (user) void refreshPushSubscription(user.uid);
   }, [user]);

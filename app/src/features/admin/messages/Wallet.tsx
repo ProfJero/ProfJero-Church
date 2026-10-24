@@ -57,7 +57,9 @@ export function Wallet() {
     }
   }, []);
 
-  useEffect(() => void load(), [load]);
+  useEffect(() => {
+    void load();
+  }, [load]);
 
   // Returning from checkout: confirm the payment (credits the wallet if paid)
   useEffect(() => {

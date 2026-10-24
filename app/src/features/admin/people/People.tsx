@@ -299,7 +299,9 @@ function BulkUpdate({
 }) {
   const [value, setValue] = useState('');
   const [busy, setBusy] = useState(false);
-  useEffect(() => setValue(''), [mode]);
+  useEffect(() => {
+    setValue('');
+  }, [mode]);
   async function apply() {
     if (!value) return;
     setBusy(true);

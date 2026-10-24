@@ -47,7 +47,9 @@ export default function MemberLayout() {
   const online = useOnline();
   const { pathname } = useLocation();
 
-  useEffect(() => window.scrollTo({ top: 0 }), [pathname]);
+  useEffect(() => {
+    window.scrollTo({ top: 0 });
+  }, [pathname]);
   useEffect(() => {
     if (user) void refreshPushSubscription(user.uid);
   }, [user]);
