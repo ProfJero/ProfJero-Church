@@ -13,6 +13,12 @@ cleanupOutdatedCaches();
 // SPA: every navigation serves the cached index.html, so the app opens offline.
 registerRoute(new NavigationRoute(createHandlerBoundToURL('/index.html'), { denylist: [/^\/humans\.txt/, /^\/robots\.txt/] }));
 
+// Code chunks not precached (admin screens, charts): hashed, so cache-first forever.
+registerRoute(
+  ({ url, request }) => url.origin === self.location.origin && url.pathname.startsWith('/assets/') && request.destination === 'script',
+  new CacheFirst({ cacheName: 'cwc-code', plugins: [new ExpirationPlugin({ maxEntries: 120, purgeOnQuotaError: true })] }),
+);
+
 // Cloudinary media — cache-first, capped so phones don't fill up.
 registerRoute(
   ({ url }) => url.hostname === 'res.cloudinary.com',

@@ -156,6 +156,10 @@ describe('events & attendance', () => {
     await assertSucceeds(setDoc(doc(d, 'attendance', 's-open_m-ama'), { serviceId: 's-open', memberId: 'm-ama', method: 'self' }));
     await assertFails(setDoc(doc(d, 'attendance', 's-closed_m-ama'), { serviceId: 's-closed', memberId: 'm-ama', method: 'self' }));
     await assertFails(setDoc(doc(d, 'attendance', 's-open_m-kofi'), { serviceId: 's-open', memberId: 'm-kofi', method: 'self' }));
+    // members can see whether they are checked in, but not other people's records
+    await assertSucceeds(getDoc(doc(d, 'attendance', 's-closed_m-ama')));
+    await env.withSecurityRulesDisabled((ctx) => setDoc(doc(ctx.firestore(), 'attendance', 's-open_m-kofi'), { serviceId: 's-open', memberId: 'm-kofi', method: 'manual' }));
+    await assertFails(getDoc(doc(d, 'attendance', 's-open_m-kofi')));
   });
 });
 

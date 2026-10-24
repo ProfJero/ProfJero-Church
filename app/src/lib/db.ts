@@ -106,28 +106,66 @@ function getSubscriber(key: string, makeStart: () => (set: (s: LiveState<unknown
   return s;
 }
 
+const RETRY_DELAYS = [1500, 4000, 10000];
+const RETRYABLE = new Set(['permission-denied', 'unavailable', 'unauthenticated', 'deadline-exceeded', 'resource-exhausted']);
+
+/**
+ * Wraps a Firestore listener so transient failures (a role or profile that is
+ * still propagating right after sign-up, a dropped connection) retry with
+ * backoff instead of leaving the screen stuck until a reload.
+ */
+function resilient(listen: (onError: (e: Error) => void) => () => void, set: (s: LiveState<unknown>) => void, empty: unknown, label: string) {
+  let unsub: (() => void) | undefined;
+  let timer: ReturnType<typeof setTimeout> | undefined;
+  let attempt = 0;
+  let stopped = false;
+  const start = () => {
+    unsub = listen((error) => {
+      const code = (error as { code?: string }).code ?? '';
+      if (!stopped && RETRYABLE.has(code) && attempt < RETRY_DELAYS.length) {
+        timer = setTimeout(start, RETRY_DELAYS[attempt++]);
+        return;
+      }
+      console.error('[cwc] listener failed', label, error);
+      set({ data: empty, loading: false, error });
+    });
+  };
+  start();
+  return () => {
+    stopped = true;
+    clearTimeout(timer);
+    unsub?.();
+  };
+}
+
 function buildListStart<T>(build: () => Query) {
   return (set: (s: LiveState<unknown>) => void) =>
-    onSnapshot(
-      build(),
-      { includeMetadataChanges: false },
-      (snap) => set({ data: snap.docs.map((d) => withId<T>(d.id, d.data())), loading: false, error: null }),
-      (error) => {
-        console.error('[cwc] query failed', error);
-        set({ data: [], loading: false, error });
-      },
+    resilient(
+      (onError) =>
+        onSnapshot(build(), (snap) => set({ data: snap.docs.map((d) => withId<T>(d.id, d.data())), loading: false, error: null }), onError),
+      set,
+      [],
+      'query',
     );
 }
 
 function buildDocStart<T>(path: string) {
   return (set: (s: LiveState<unknown>) => void) =>
-    onSnapshot(
-      doc(db, path),
-      (snap) => set({ data: snap.exists() ? withId<T>(snap.id, snap.data()) : null, loading: false, error: null }),
-      (error) => {
-        console.error('[cwc] doc failed', path, error);
-        set({ data: null, loading: false, error });
-      },
+    resilient(
+      (onError) =>
+        onSnapshot(
+          doc(db, path),
+          { includeMetadataChanges: true },
+          (snap) => {
+            // Don't show "not found" for a document we simply haven't fetched yet.
+            if (!snap.exists() && snap.metadata.fromCache) return;
+            set({ data: snap.exists() ? withId<T>(snap.id, snap.data()) : null, loading: false, error: null });
+          },
+          onError,
+        ),
+      set,
+      null,
+      path,
     );
 }
 

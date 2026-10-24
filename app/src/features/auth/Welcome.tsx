@@ -71,13 +71,13 @@ export default function Welcome() {
         </div>
       </section>
 
-      <section className="mx-auto grid max-w-6xl gap-3 px-5 sm:grid-cols-2 sm:px-8 lg:grid-cols-4">
+      <section aria-label="What you can do" className="mx-auto grid max-w-6xl gap-3 px-5 sm:grid-cols-2 sm:px-8 lg:grid-cols-4">
         {FEATURES.map((f) => (
           <div key={f.title} className="card p-5">
             <span className="grid size-10 place-items-center rounded-xl bg-accent-soft text-accent-soft-fg">
               <f.icon className="size-5" />
             </span>
-            <h3 className="mt-4 text-[15px] font-semibold">{f.title}</h3>
+            <h2 className="mt-4 text-[15px] font-semibold">{f.title}</h2>
             <p className="mt-1 text-sm leading-relaxed text-fg-3">{f.text}</p>
           </div>
         ))}

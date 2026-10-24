@@ -22,7 +22,9 @@ export default defineConfig({
       injectManifest: {
         globPatterns: ['**/*.{js,css,html,svg,png,woff2,webmanifest}'],
         // Only precache Latin font subsets — keeps the first install light on mobile data.
-        globIgnores: ['**/*cyrillic*', '**/*greek*', '**/*vietnamese*', '**/screenshots/**'],
+        // Admin screens and the charts library are cached on first use instead,
+        // so members' phones don't download staff-only code on install.
+        globIgnores: ['**/*cyrillic*', '**/*greek*', '**/*vietnamese*', '**/screenshots/**', 'assets/admin-*', 'assets/charts-*', '**/*.map'],
         maximumFileSizeToCacheInBytes: 4 * 1024 * 1024,
       },
       manifest: {
@@ -55,15 +57,24 @@ export default defineConfig({
       devOptions: { enabled: false, type: 'module' },
     }),
   ],
+  server: {
+    // Test artefacts must not trigger reloads in pages under test.
+    watch: { ignored: ['**/test-results/**', '**/playwright-report/**', '**/e2e/**', '**/dist/**'] },
+  },
   build: {
     target: 'es2020',
     chunkSizeWarningLimit: 900,
     rollupOptions: {
       output: {
-        manualChunks: {
-          firebase: ['firebase/app', 'firebase/auth', 'firebase/firestore'],
-          charts: ['recharts'],
-          react: ['react', 'react-dom', 'react-router'],
+        manualChunks(id) {
+          if (/node_modules\/(react|react-dom|scheduler|react-router)\//.test(id)) return 'react';
+          if (/node_modules\/(@firebase|firebase)\//.test(id)) return 'firebase';
+          return undefined;
+        },
+        chunkFileNames(chunk) {
+          const staffOnly = (m: string) => m.includes('/src/features/admin/') || m.includes('/src/layouts/AdminLayout') || m.includes('/src/components/command-palette');
+          const admin = (!!chunk.facadeModuleId && staffOnly(chunk.facadeModuleId)) || (chunk.moduleIds.length > 0 && chunk.moduleIds.every(staffOnly));
+          return admin ? 'assets/admin-[name]-[hash].js' : 'assets/[name]-[hash].js';
         },
       },
     },

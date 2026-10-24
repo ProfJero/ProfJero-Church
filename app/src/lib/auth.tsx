@@ -73,7 +73,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setLoading(true);
       unsubProfile = onSnapshot(
         doc(db, 'users', u.uid),
+        { includeMetadataChanges: true },
         (snap) => {
+          // A cache-only "missing" (slow or no connection on first sign-in) isn't an answer — wait for the server.
+          if (!snap.exists() && snap.metadata.fromCache) return;
           const p = snap.exists() ? ({ id: snap.id, ...snap.data() } as UserProfile) : null;
           setProfile(p);
           setActor(p ? { uid: u.uid, name: p.fullName || u.email || 'User' } : null);

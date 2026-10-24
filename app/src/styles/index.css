@@ -2,6 +2,10 @@
 @import '@fontsource-variable/inter';
 @import '@fontsource-variable/fraunces';
 
+@source not '../../e2e';
+@source not '../../test-results';
+@source not '../../scripts';
+
 @custom-variant dark (&:where(.dark, .dark *));
 
 /*
@@ -40,7 +44,7 @@
   --color-line-strong: #d4d4d8;
   --color-fg: #18181b;
   --color-fg-2: #52525b;
-  --color-fg-3: #8a8a93;
+  --color-fg-3: #6b6b74; /* ≥4.5:1 on surfaces (WCAG AA) */
   --color-accent: var(--color-brand-700);
   --color-accent-fg: #ffffff;
   --color-accent-soft: var(--color-brand-50);
@@ -86,7 +90,7 @@
   --color-line-strong: #2f374a;
   --color-fg: #eceef3;
   --color-fg-2: #a8afbf;
-  --color-fg-3: #6f7789;
+  --color-fg-3: #8d96a8;
   --color-accent: var(--color-brand-500);
   --color-accent-fg: #ffffff;
   --color-accent-soft: color-mix(in oklab, var(--color-brand-500) 16%, transparent);

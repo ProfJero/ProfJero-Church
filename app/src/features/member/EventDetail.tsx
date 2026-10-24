@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useParams } from 'react-router';
 import { CalendarDays, MapPin, Clock, CalendarPlus, Share2, Check, Users, Minus, Plus, ExternalLink } from 'lucide-react';
 import { doc, increment, serverTimestamp, writeBatch } from 'firebase/firestore';
@@ -21,11 +21,17 @@ export default function EventDetail() {
   const { data: rsvp } = useMyRsvp(id, user?.uid);
   const [guests, setGuests] = useState(0);
   const [busy, setBusy] = useState(false);
+  // Reflect the member's choice immediately; live data takes over once it catches up.
+  const [optimistic, setOptimistic] = useState<boolean | null>(null);
+  const going = optimistic ?? !!rsvp;
+  useEffect(() => {
+    if (optimistic !== null && optimistic === !!rsvp) setOptimistic(null);
+  }, [rsvp, optimistic]);
   if (loading) return <FullPageLoader />;
   if (!e) return <EmptyState icon={<CalendarDays />} title="Event not found" />;
 
   const past = (e.endAt || e.startAt) < new Date().toISOString().slice(0, 16);
-  const full = !!e.capacity && (e.rsvpCount ?? 0) >= e.capacity && !rsvp;
+  const full = !!e.capacity && (e.rsvpCount ?? 0) >= e.capacity && !going;
 
   async function toggle() {
     if (!user) return;
@@ -33,7 +39,7 @@ export default function EventDetail() {
     try {
       const b = writeBatch(db);
       const ref = doc(db, 'events', e!.id, 'rsvps', user.uid);
-      if (rsvp) {
+      if (going) {
         b.delete(ref);
         b.update(doc(db, 'events', e!.id), { rsvpCount: increment(-1) });
       } else {
@@ -41,7 +47,8 @@ export default function EventDetail() {
         b.update(doc(db, 'events', e!.id), { rsvpCount: increment(1) });
       }
       await b.commit();
-      toast.success(rsvp ? 'RSVP cancelled' : 'You’re going! We’ve saved your spot.');
+      setOptimistic(!going);
+      toast.success(going ? 'RSVP cancelled' : 'You’re going! We’ve saved your spot.');
     } catch (err) {
       toast.error((err as Error).message);
     } finally {
@@ -68,7 +75,7 @@ export default function EventDetail() {
 
         <div className="sticky bottom-[calc(4.5rem+env(safe-area-inset-bottom))] z-10 mt-8 md:static">
           <div className="card flex flex-col gap-3 p-3 shadow-[var(--shadow-pop)] sm:flex-row sm:items-center md:shadow-none">
-            {e.rsvpEnabled && !past && !rsvp && !full && (
+            {e.rsvpEnabled && !past && !going && !full && (
               <div className="flex items-center justify-between gap-3 sm:justify-start">
                 <span className="text-sm text-fg-2">Bringing guests?</span>
                 <span className="flex items-center gap-1">
@@ -82,8 +89,8 @@ export default function EventDetail() {
               <Button variant="outline" size="lg" className="flex-1 sm:flex-none" icon={<CalendarPlus />} onClick={() => downloadBlob(`${e.title}.ics`, new Blob([icsFor({ ...e, description: e.description })], { type: 'text/calendar' }))} aria-label="Add to calendar" />
               <Button variant="outline" size="lg" className="flex-1 sm:flex-none" icon={<Share2 />} aria-label="Share" onClick={async () => (await shareOrCopy({ title: e.title, text: `${e.title} — ${fmtDate(e.startAt, 'EEE d MMM')} at ${fmtTime(e.startAt)}`, url: location.href })) === 'copied' && toast.success('Link copied')} />
               {e.rsvpEnabled && !past && (
-                <Button size="lg" className="flex-[3] sm:flex-none" variant={rsvp ? 'soft' : 'primary'} icon={rsvp ? <Check /> : undefined} loading={busy} disabled={full} onClick={toggle}>
-                  {rsvp ? 'Going · Cancel' : full ? 'Fully booked' : 'I’m attending'}
+                <Button size="lg" className="flex-[3] sm:flex-none" variant={going ? 'soft' : 'primary'} icon={going ? <Check /> : undefined} loading={busy} disabled={full} onClick={toggle}>
+                  {going ? 'Going · Cancel' : full ? 'Fully booked' : 'I’m attending'}
                 </Button>
               )}
             </div>

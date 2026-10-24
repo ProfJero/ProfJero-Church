@@ -26,9 +26,22 @@
         document.documentElement.classList.toggle('dark', d);
       } catch (e) {}
     </script>
+    <style>
+      html { background: #f7f7f8; color: #18181b; }
+      html.dark { background: #0a0d16; color: #eceef3; }
+      .splash-name { font-size: 15px; font-weight: 600; letter-spacing: -0.01em; opacity: .8; }
+    </style>
   </head>
   <body>
-    <div id="root"></div>
+    <div id="root">
+      <!-- Painted instantly while the app loads; replaced when React mounts. -->
+      <div style="min-height:100dvh;display:grid;place-items:center;font-family:system-ui,-apple-system,'Segoe UI',Roboto,sans-serif">
+        <div style="display:flex;flex-direction:column;align-items:center;gap:14px">
+          <img src="/icons/icon-192.png" width="72" height="72" alt="" style="border-radius:18px;box-shadow:0 8px 24px rgb(30 58 138/.25)" />
+          <div class="splash-name">Christian Worship Centre</div>
+        </div>
+      </div>
+    </div>
     <noscript>Christian Worship Centre needs JavaScript to run.</noscript>
     <script type="module" src="/src/main.tsx"></script>
   </body>

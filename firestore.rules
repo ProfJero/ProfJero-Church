@@ -103,7 +103,8 @@ service cloud.firestore {
     }
 
     match /attendance/{id} {
-      allow read: if attendance() || staff() || (signedIn() && resource.data.memberId == myMemberId());
+      // A member may read their own record; reading one that doesn't exist yet (pre check-in) reveals nothing.
+      allow read: if attendance() || staff() || (signedIn() && (resource == null || resource.data.memberId == myMemberId()));
       allow create: if attendance() || (
         // QR self check-in: one record per member per service, only while the service is open
         signedIn() && myMemberId() != null && incoming().memberId == myMemberId() && incoming().method == 'self'

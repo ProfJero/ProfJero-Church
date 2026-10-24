@@ -1,4 +1,4 @@
-import { forwardRef, useId, type InputHTMLAttributes, type ReactNode, type SelectHTMLAttributes, type TextareaHTMLAttributes } from 'react';
+import { cloneElement, forwardRef, isValidElement, useId, type InputHTMLAttributes, type ReactElement, type ReactNode, type SelectHTMLAttributes, type TextareaHTMLAttributes } from 'react';
 import * as SwitchPrimitive from '@radix-ui/react-switch';
 import { ChevronDown, Search, X } from 'lucide-react';
 import { cn } from '@/lib/utils';
@@ -51,16 +51,23 @@ export function Field({
   className?: string;
   htmlFor?: string;
 }) {
+  const auto = useId();
+  // Link the label (and hint) to a single control child automatically.
+  const single = isValidElement(children) && typeof children.type !== 'string' ? (children as ReactElement<{ id?: string; 'aria-describedby'?: string }>) : isValidElement(children) && ['input', 'select', 'textarea'].includes(children.type as string) ? (children as ReactElement<{ id?: string; 'aria-describedby'?: string }>) : null;
+  const id = htmlFor ?? single?.props.id ?? (single ? auto : undefined);
+  const hintId = `${auto}-hint`;
+  const describe = error || hint ? hintId : undefined;
+  const control = single && (!single.props.id || describe) ? cloneElement(single, { id, 'aria-describedby': single.props['aria-describedby'] ?? describe }) : children;
   return (
     <div className={cn('flex flex-col gap-1.5', className)}>
       {label && (
-        <label htmlFor={htmlFor} className="text-[13px] font-medium text-fg-2">
+        <label htmlFor={id} className="text-[13px] font-medium text-fg-2">
           {label}
-          {required && <span className="ml-0.5 text-danger">*</span>}
+          {required && <span className="ml-0.5 text-danger" aria-hidden="true">*</span>}
         </label>
       )}
-      {children}
-      {error ? <p className="text-xs text-danger">{error}</p> : hint ? <p className="text-xs text-fg-3">{hint}</p> : null}
+      {control}
+      {error ? <p id={hintId} className="text-xs text-danger">{error}</p> : hint ? <p id={hintId} className="text-xs text-fg-3">{hint}</p> : null}
     </div>
   );
 }
