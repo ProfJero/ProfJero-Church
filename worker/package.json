@@ -1,0 +1,21 @@
+{
+  "name": "cwc-api",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "author": "ProfJero",
+  "description": "Christian Worship Centre API — ProfJero Connect SMS proxy, Web Push and Cloudinary signing on Cloudflare Workers.",
+  "scripts": {
+    "dev": "wrangler dev",
+    "deploy": "wrangler deploy",
+    "test": "vitest run",
+    "typecheck": "tsc --noEmit",
+    "vapid": "node scripts/generate-vapid.mjs"
+  },
+  "devDependencies": {
+    "@cloudflare/workers-types": "^5.20261024.1",
+    "typescript": "^5.9.3",
+    "vitest": "^3.2.7",
+    "wrangler": "^4.152.0"
+  }
+}

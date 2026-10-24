@@ -1,0 +1,239 @@
+rules_version = '2';
+
+// Christian Worship Centre — Firestore security rules.
+// Mirrors the role matrix in app/src/lib/permissions.ts. The UI hides what a role
+// can't do; these rules are what actually enforce it.
+// Crafted by ProfJero.
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ---------- identity ----------
+    function signedIn() { return request.auth != null; }
+    function uid() { return request.auth.uid; }
+    function userPath(id) { return /databases/$(database)/documents/users/$(id); }
+    function hasProfile() { return signedIn() && exists(userPath(uid())); }
+    function me() { return get(userPath(uid())).data; }
+    function active() { return hasProfile() && me().get('isActive', true) == true; }
+    function role() { return active() ? me().role : 'none'; }
+    function anyRole(roles) { return signedIn() && role() in roles; }
+    function myMemberId() { return active() ? me().get('memberId', null) : null; }
+
+    // ---------- permissions (keep in sync with permissions.ts) ----------
+    function superAdmin()     { return anyRole(['super_admin']); }
+    function admin()          { return anyRole(['super_admin', 'admin']); }
+    function staff()          { return anyRole(['super_admin', 'admin', 'pastor', 'treasurer', 'secretary', 'staff', 'viewer']); }
+    function peopleManage()   { return anyRole(['super_admin', 'admin', 'pastor', 'secretary']); }
+    function followUps()      { return anyRole(['super_admin', 'admin', 'pastor', 'secretary', 'staff']); }
+    function attendance()     { return anyRole(['super_admin', 'admin', 'pastor', 'secretary', 'staff']); }
+    function givingView()     { return anyRole(['super_admin', 'admin', 'pastor', 'treasurer']); }
+    function givingManage()   { return anyRole(['super_admin', 'admin', 'treasurer']); }
+    function eventsManage()   { return anyRole(['super_admin', 'admin', 'pastor', 'secretary']); }
+    function contentManage()  { return anyRole(['super_admin', 'admin', 'pastor', 'secretary']); }
+    function care()           { return anyRole(['super_admin', 'admin', 'pastor']); }
+    function messaging()      { return anyRole(['super_admin', 'admin', 'pastor', 'secretary']); }
+
+    // ---------- helpers ----------
+    function incoming() { return request.resource.data; }
+    function changed() { return request.resource.data.diff(resource.data).affectedKeys(); }
+    function onlyChanges(keys) { return changed().hasOnly(keys); }
+    function bootstrapPath() { return /databases/$(database)/documents/settings/bootstrap; }
+
+    // ---------- settings (public: church name, service times, giving accounts) ----------
+    match /settings/{docId} {
+      allow read: if true;
+      allow write: if docId != 'bootstrap' && admin();
+      // First-run: the very first account may claim super admin, once.
+      allow create: if docId == 'bootstrap' && signedIn() && !exists(bootstrapPath())
+        && getAfter(userPath(uid())).data.role == 'super_admin';
+    }
+
+    // ---------- users (app accounts & roles) ----------
+    match /users/{userId} {
+      allow read: if signedIn() && (userId == uid() || staff());
+
+      allow create: if signedIn() && (
+        // self sign-up as a member
+        (userId == uid() && incoming().role == 'member' && incoming().isActive == true && incoming().get('memberId', null) == null)
+        // first-run super admin (paired with settings/bootstrap in one batch)
+        || (userId == uid() && incoming().role == 'super_admin' && !exists(bootstrapPath()) && existsAfter(bootstrapPath()))
+        // admins creating accounts for staff
+        || (admin() && (incoming().role != 'super_admin' || superAdmin()))
+      );
+
+      allow update: if signedIn() && (
+        (userId == uid() && onlyChanges(['fullName', 'phone', 'photoUrl', 'lastLogin', 'notificationPrefs', 'updatedAt']))
+        || (superAdmin())
+        || (admin() && resource.data.role != 'super_admin' && incoming().role != 'super_admin')
+      );
+
+      allow delete: if superAdmin() || (admin() && resource.data.role != 'super_admin');
+    }
+
+    // ---------- people ----------
+    match /members/{memberId} {
+      allow read: if staff() || (signedIn() && (resource.data.get('uid', null) == uid() || myMemberId() == memberId));
+      allow create: if peopleManage();
+      allow update: if peopleManage() || (signedIn() && myMemberId() == memberId && onlyChanges([
+        'phone', 'altPhone', 'email', 'address', 'gpsAddress', 'occupation', 'photoUrl', 'dob', 'birthMonthDay',
+        'maritalStatus', 'anniversary', 'emergencyName', 'emergencyPhone', 'emergencyRelation', 'keywords', 'updatedAt', 'smsOptOut'
+      ]));
+      allow delete: if admin();
+    }
+
+    match /households/{id} {
+      allow read: if staff();
+      allow write: if peopleManage();
+    }
+
+    match /groups/{id} {
+      allow read: if signedIn();
+      allow write: if peopleManage();
+    }
+
+    match /followups/{id} {
+      allow read, write: if followUps();
+    }
+
+    // ---------- attendance ----------
+    match /services/{id} {
+      allow read: if signedIn();
+      allow create, update: if attendance();
+      allow delete: if admin() || anyRole(['pastor', 'secretary']);
+    }
+
+    match /attendance/{id} {
+      // A member may read their own record; reading one that doesn't exist yet (pre check-in) reveals nothing.
+      allow read: if attendance() || staff() || (signedIn() && (resource == null || resource.data.memberId == myMemberId()));
+      allow create: if attendance() || (
+        // QR self check-in: one record per member per service, only while the service is open
+        signedIn() && myMemberId() != null && incoming().memberId == myMemberId() && incoming().method == 'self'
+        && id == incoming().serviceId + '_' + myMemberId()
+        && get(/databases/$(database)/documents/services/$(incoming().serviceId)).data.isOpen == true
+      );
+      allow update, delete: if attendance();
+    }
+
+    // ---------- giving & finance ----------
+    match /gifts/{id} {
+      allow read: if givingView() || (signedIn() && myMemberId() != null && resource.data.memberId == myMemberId());
+      allow write: if givingManage();
+    }
+
+    match /pledges/{id} {
+      allow read: if givingView() || (signedIn() && myMemberId() != null && resource.data.memberId == myMemberId());
+      allow write: if givingManage();
+    }
+
+    match /campaigns/{id} {
+      allow read: if signedIn();
+      allow write: if givingManage();
+    }
+
+    match /expenses/{id} {
+      allow read: if givingView();
+      allow write: if givingManage();
+    }
+
+    // ---------- events ----------
+    match /events/{eventId} {
+      allow read: if (signedIn() && resource.data.status == 'published') || eventsManage();
+      allow create, delete: if eventsManage();
+      allow update: if eventsManage() || (
+        // RSVP counter moves by exactly one, tied to the caller's own RSVP doc
+        signedIn() && resource.data.status == 'published' && onlyChanges(['rsvpCount']) && (
+          (incoming().rsvpCount == resource.data.get('rsvpCount', 0) + 1
+            && !exists(/databases/$(database)/documents/events/$(eventId)/rsvps/$(uid()))
+            && existsAfter(/databases/$(database)/documents/events/$(eventId)/rsvps/$(uid())))
+          || (incoming().rsvpCount == resource.data.get('rsvpCount', 0) - 1
+            && exists(/databases/$(database)/documents/events/$(eventId)/rsvps/$(uid()))
+            && !existsAfter(/databases/$(database)/documents/events/$(eventId)/rsvps/$(uid())))
+        )
+      );
+
+      match /rsvps/{rsvpUid} {
+        allow read: if (signedIn() && rsvpUid == uid()) || eventsManage();
+        allow create, update: if signedIn() && rsvpUid == uid() && incoming().uid == uid();
+        allow delete: if (signedIn() && rsvpUid == uid()) || eventsManage();
+      }
+    }
+
+    // ---------- content ----------
+    match /devotionals/{id} {
+      allow read: if (signedIn() && resource.data.status == 'published') || contentManage();
+      allow write: if contentManage();
+    }
+    match /sermons/{id} {
+      allow read: if (signedIn() && resource.data.status == 'published') || contentManage();
+      allow write: if contentManage();
+    }
+    match /announcements/{id} {
+      allow read: if (signedIn() && resource.data.status == 'published') || contentManage();
+      allow write: if contentManage();
+    }
+
+    // ---------- pastoral care ----------
+    match /care_requests/{id} {
+      allow read: if care()
+        || (signedIn() && resource.data.uid == uid())
+        || (signedIn() && resource.data.visibility == 'public' && resource.data.type == 'prayer');
+
+      allow create: if care() || (
+        signedIn() && incoming().uid == uid() && incoming().status == 'new'
+        && incoming().responses.size() == 0 && incoming().get('assignedTo', null) == null
+      );
+
+      allow update: if care()
+        // the requester can add a reply or close their own request
+        || (signedIn() && resource.data.uid == uid() && onlyChanges(['responses', 'status', 'updatedAt'])
+            && incoming().responses.size() == resource.data.responses.size() + 1
+            && incoming().status in [resource.data.status, 'closed'])
+        // anyone can say "I prayed" on a public prayer
+        || (signedIn() && resource.data.visibility == 'public' && onlyChanges(['prayedCount'])
+            && incoming().prayedCount == resource.data.get('prayedCount', 0) + 1);
+
+      allow delete: if care() || (signedIn() && resource.data.uid == uid());
+
+      match /notes/{noteId} {
+        allow read, write: if care();
+      }
+    }
+
+    match /care_logs/{id} {
+      allow read, write: if care();
+    }
+
+    match /testimonies/{id} {
+      allow read: if (signedIn() && (resource.data.status == 'published' || resource.data.get('uid', null) == uid())) || contentManage() || care();
+      allow create: if (signedIn() && incoming().uid == uid() && incoming().status == 'pending') || contentManage() || care();
+      allow update, delete: if contentManage() || care();
+    }
+
+    // ---------- messaging ----------
+    match /sms_messages/{id} {
+      allow read, write: if messaging();
+    }
+    match /sms_templates/{id} {
+      allow read, write: if messaging();
+    }
+
+    match /notifications/{id} {
+      allow read: if (signedIn() && resource.data.audience in ['all', uid()]) || messaging() || care();
+      allow create: if messaging() || care();
+      allow update, delete: if messaging();
+    }
+
+    match /push_subscriptions/{id} {
+      allow read: if (signedIn() && resource.data.uid == uid()) || messaging() || care();
+      allow create, update: if signedIn() && incoming().uid == uid();
+      allow delete: if (signedIn() && resource.data.uid == uid()) || messaging() || care();
+    }
+
+    // ---------- audit ----------
+    match /audit_logs/{id} {
+      allow read: if admin();
+      allow create: if staff() && incoming().by == uid();
+      allow update, delete: if false;
+    }
+  }
+}

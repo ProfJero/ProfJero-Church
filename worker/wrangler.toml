@@ -1,0 +1,28 @@
+# Christian Worship Centre API — crafted by ProfJero
+name = "cwc-api"
+main = "src/index.ts"
+compatibility_date = "2025-09-01"
+compatibility_flags = ["nodejs_compat"]
+
+[vars]
+FIREBASE_PROJECT_ID = "your-firebase-project-id"
+# Comma-separated list of origins allowed to call the API (your app URLs)
+ALLOWED_ORIGINS = "https://your-app.web.app,http://localhost:5173"
+PROFJERO_BASE_URL = "https://profjero-sms-api-prod.amoakob947.workers.dev"
+PROFJERO_SENDER_ID = ""
+VAPID_SUBJECT = "mailto:admin@example.com"
+CLOUDINARY_CLOUD_NAME = ""
+# "true" only for local development against the Firebase emulators
+EMULATOR = "false"
+
+# Daily jobs (UTC — the same as Ghana time): birthday SMS at 07:00
+[triggers]
+crons = ["0 7 * * *"]
+
+# Secrets — set with `npx wrangler secret put NAME`:
+#   PROFJERO_API_KEY          ProfJero Connect secret key (pk_live_…)
+#   VAPID_PUBLIC_KEY          from `npm run vapid`
+#   VAPID_PRIVATE_KEY         from `npm run vapid`
+#   CLOUDINARY_API_KEY        Cloudinary API key
+#   CLOUDINARY_API_SECRET     Cloudinary API secret
+#   FIREBASE_SERVICE_ACCOUNT  (optional) service-account JSON for birthday SMS & password resets

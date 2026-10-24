@@ -1,0 +1,6 @@
+# Copy to .dev.vars for `npm run dev` (never commit .dev.vars)
+PROFJERO_API_KEY=pk_live_xxxxxxxx
+VAPID_PUBLIC_KEY=
+VAPID_PRIVATE_KEY=
+CLOUDINARY_API_KEY=
+CLOUDINARY_API_SECRET=

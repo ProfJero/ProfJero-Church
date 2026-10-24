@@ -1,0 +1,21 @@
+{
+  "name": "christian-worship-centre",
+  "private": true,
+  "version": "1.0.0",
+  "description": "Christian Worship Centre — church management PWA. Crafted by ProfJero.",
+  "author": "ProfJero",
+  "scripts": {
+    "emulators": "firebase emulators:start --only auth,firestore --project demo-cwc",
+    "seed": "node scripts/seed.mjs",
+    "test:rules": "firebase emulators:exec --only firestore --project demo-cwc \"vitest run --root rules-tests\"",
+    "deploy:rules": "firebase deploy --only firestore",
+    "deploy:hosting": "npm --prefix app run build && firebase deploy --only hosting"
+  },
+  "devDependencies": {
+    "@firebase/rules-unit-testing": "^5.0.2",
+    "firebase": "^12.19.0",
+    "firebase-admin": "^13.10.0",
+    "firebase-tools": "^14.27.0",
+    "vitest": "^3.2.7"
+  }
+}
