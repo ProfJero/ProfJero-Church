@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RGCI Church Management | Ekklesia</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        * { font-family: 'Inter', sans-serif; }
+        .hero-gradient {
+            background: linear-gradient(135deg, #6a1b9a 0%, #9c4dcc 50%, #e8d5f5 100%);
+        }
+        .feature-card {
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        .feature-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 25px -12px rgba(106, 27, 154, 0.2);
+        }
+        @keyframes float {
+            0% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+            100% { transform: translateY(0px); }
+        }
+        .float-animation {
+            animation: float 3s ease-in-out infinite;
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="bg-white shadow-md sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex justify-between items-center">
+            <div class="flex items-center gap-2">
+                <img src="images/rgci-logo.png" alt="RGCI Official Logo" width="50px">
+                <span class="font-bold text-xl text-gray-800">RGCI</span>
+                <span class="text-xs text-purple-600 ml-1 hidden sm:inline">Ekklesia Suite</span>
+            </div>
+            <div class="flex items-center gap-4">
+                <a href="login.html" class="text-[#6a1b9a] font-medium hover:text-[#9c4dcc] transition">Sign In</a>
+                <a href="login.html" class="bg-gradient-to-r from-[#6a1b9a] to-[#9c4dcc] text-white px-5 py-2 rounded-full font-semibold hover:shadow-lg transition">
+                    Get Started
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="hero-gradient text-white py-20">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+                <div class="text-center lg:text-left">
+                    <h1 class="text-4xl md:text-5xl lg:text-6xl font-bold leading-tight">
+                        The Future of <span class="text-yellow-300">Church Management</span> Is Here
+                    </h1>
+                    <p class="text-lg md:text-xl text-purple-100 mt-4">
+                        Engineered for churches ready to lead with clarity, purpose, and precision.
+                    </p>
+                    <div class="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start mt-8">
+                        <a href="login.html" class="bg-white text-[#6a1b9a] px-8 py-3 rounded-full font-semibold hover:shadow-xl transition text-center">
+                            Get Started Free →
+                        </a>
+                        <a href="#features" class="border-2 border-white text-white px-8 py-3 rounded-full font-semibold hover:bg-white hover:text-[#6a1b9a] transition text-center">
+                            Learn More
+                        </a>
+                    </div>
+                    <p class="text-purple-200 text-sm mt-6">
+                        ✦ Unveiling the Extraordinary ✦
+                    </p>
+                </div>
+                <div class="relative">
+                    <div class="bg-white bg-opacity-10 rounded-2xl p-6 backdrop-blur-sm float-animation">
+                        <div class="grid grid-cols-2 gap-4">
+                            <div class="text-center p-3"><i class="fas fa-users text-3xl mb-2"></i><p class="text-sm">Member Hub</p></div>
+                            <div class="text-center p-3"><i class="fas fa-coins text-3xl mb-2"></i><p class="text-sm">Smart Finance</p></div>
+                            <div class="text-center p-3"><i class="fas fa-calendar-check text-3xl mb-2"></i><p class="text-sm">Attendance AI</p></div>
+                            <div class="text-center p-3"><i class="fas fa-sms text-3xl mb-2"></i><p class="text-sm">SMS Engine</p></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section id="features" class="py-20 bg-gray-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-12">
+                <h2 class="text-3xl md:text-4xl font-bold text-gray-800">One Platform. Everything Your Church Needs.</h2>
+                <p class="text-gray-500 mt-2">All features included — no hidden upgrades</p>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <div class="feature-card bg-white rounded-2xl p-6 shadow-md">
+                    <div class="w-12 h-12 bg-purple-100 rounded-xl flex items-center justify-center mb-4">
+                        <i class="fas fa-users text-xl text-[#6a1b9a]"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-gray-800">Member Hub</h3>
+                    <p class="text-gray-500 mt-2">Complete profiles with photos, family links & fellowship groups. Powerful instant search.</p>
+                </div>
+                <div class="feature-card bg-white rounded-2xl p-6 shadow-md">
+                    <div class="w-12 h-12 bg-purple-100 rounded-xl flex items-center justify-center mb-4">
+                        <i class="fas fa-coins text-xl text-[#6a1b9a]"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-gray-800">Smart Finance</h3>
+                    <p class="text-gray-500 mt-2">Track tithes, offerings & pledges. Multi-fund accounting. Year-end reports ready.</p>
+                </div>
+                <div class="feature-card bg-white rounded-2xl p-6 shadow-md">
+                    <div class="w-12 h-12 bg-purple-100 rounded-xl flex items-center justify-center mb-4">
+                        <i class="fas fa-calendar-check text-xl text-[#6a1b9a]"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-gray-800">Attendance AI</h3>
+                    <p class="text-gray-500 mt-2">QR code or manual check-in. Auto-identifies absent members for pastoral action.</p>
+                </div>
+                <div class="feature-card bg-white rounded-2xl p-6 shadow-md">
+                    <div class="w-12 h-12 bg-purple-100 rounded-xl flex items-center justify-center mb-4">
+                        <i class="fas fa-sms text-xl text-[#6a1b9a]"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-gray-800">SMS Engine</h3>
+                    <p class="text-gray-500 mt-2">Automated birthday messages. Bulk announcements. Service reminders on autopilot.</p>
+                </div>
+                <div class="feature-card bg-white rounded-2xl p-6 shadow-md">
+                    <div class="w-12 h-12 bg-purple-100 rounded-xl flex items-center justify-center mb-4">
+                        <i class="fas fa-praying-hands text-xl text-[#6a1b9a]"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-gray-800">Pastoral Care</h3>
+                    <p class="text-gray-500 mt-2">Log home visits, hospital calls & counseling. Manage prayer requests.</p>
+                </div>
+                <div class="feature-card bg-white rounded-2xl p-6 shadow-md">
+                    <div class="w-12 h-12 bg-purple-100 rounded-xl flex items-center justify-center mb-4">
+                        <i class="fas fa-chart-line text-xl text-[#6a1b9a]"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-gray-800">Visitor Pipeline</h3>
+                    <p class="text-gray-500 mt-2">Capture first-timers. Automated follow-up converts visitors into members.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Stats Section -->
+    <section class="py-16 bg-[#6a1b9a] text-white">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
+                <div><div class="text-3xl md:text-4xl font-bold">8+</div><p class="text-purple-200 mt-1">Hours Saved Weekly</p></div>
+                <div><div class="text-3xl md:text-4xl font-bold">100%</div><p class="text-purple-200 mt-1">Encrypted Security</p></div>
+                <div><div class="text-3xl md:text-4xl font-bold">24/7</div><p class="text-purple-200 mt-1">Access Anywhere</p></div>
+                <div><div class="text-3xl md:text-4xl font-bold">Free</div><p class="text-purple-200 mt-1">Personal Onboarding</p></div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-gray-900 text-gray-400 py-8">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+            <p>Ekklesia by ProfJero · Restoration Grace Chapel International</p>
+            <p class="text-sm mt-2">Powered by Digital Bridge Initiative</p>
+        </div>
+    </footer>
+</body>
+</html>
