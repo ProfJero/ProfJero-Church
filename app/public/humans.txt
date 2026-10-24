@@ -1,0 +1,7 @@
+/* TEAM */
+Designed & developed by: ProfJero
+Tagline: Unveiling the Extraordinary — Building Solutions. Empowering Lives.
+
+/* SITE */
+Built for: Christian Worship Centre (CWC)
+Stack: React, TypeScript, Tailwind CSS, Firebase, Cloudflare Workers, Cloudinary, ProfJero Connect SMS

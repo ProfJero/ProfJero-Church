@@ -1,0 +1,145 @@
+@import 'tailwindcss';
+@import '@fontsource-variable/inter';
+@import '@fontsource-variable/fraunces';
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+/*
+ * Design tokens. Neutral surfaces, colour only where it carries meaning
+ * (brand = action/selection, gold = celebration, semantic = status).
+ */
+@theme {
+  --font-sans: 'Inter Variable', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --font-serif: 'Fraunces Variable', ui-serif, Georgia, serif;
+
+  --color-brand-50: #eef3ff;
+  --color-brand-100: #dbe5ff;
+  --color-brand-200: #bfd0ff;
+  --color-brand-300: #93b0fd;
+  --color-brand-400: #6088f8;
+  --color-brand-500: #3b63f1;
+  --color-brand-600: #2546d8;
+  --color-brand-700: #1e37b0;
+  --color-brand-800: #1e3a8a;
+  --color-brand-900: #1b2f6b;
+  --color-brand-950: #121c40;
+
+  --color-gold-50: #fdf8eb;
+  --color-gold-100: #f8ecc7;
+  --color-gold-300: #e7c66f;
+  --color-gold-500: #c99a2e;
+  --color-gold-600: #a97b1f;
+  --color-gold-700: #86601c;
+
+  /* Semantic surfaces (overridden in .dark) */
+  --color-bg: #f7f7f8;
+  --color-surface: #ffffff;
+  --color-surface-2: #f4f4f5;
+  --color-surface-3: #e9e9ec;
+  --color-line: #e4e4e7;
+  --color-line-strong: #d4d4d8;
+  --color-fg: #18181b;
+  --color-fg-2: #52525b;
+  --color-fg-3: #8a8a93;
+  --color-accent: var(--color-brand-700);
+  --color-accent-fg: #ffffff;
+  --color-accent-soft: var(--color-brand-50);
+  --color-accent-soft-fg: var(--color-brand-800);
+  --color-ring: color-mix(in oklab, var(--color-brand-500) 45%, transparent);
+
+  --color-success: #15803d;
+  --color-success-soft: #e9f7ee;
+  --color-warning: #b45309;
+  --color-warning-soft: #fdf3e2;
+  --color-danger: #c62828;
+  --color-danger-soft: #fdecec;
+  --color-info: #0369a1;
+  --color-info-soft: #e6f3fb;
+
+  /* Chart tokens (validated with the dataviz palette checker against these surfaces) */
+  --color-series-1: #2a78d6;
+  --color-series-2: #eb6834;
+  --color-series-3: #1baf7a;
+  --color-grid: #ececef;
+  --color-axis: #d4d4d8;
+
+  --radius-xl: 0.875rem;
+  --radius-2xl: 1.125rem;
+  --shadow-card: 0 1px 2px rgb(16 24 40 / 0.04), 0 1px 1px rgb(16 24 40 / 0.03);
+  --shadow-pop: 0 12px 32px -8px rgb(16 24 40 / 0.18), 0 2px 6px rgb(16 24 40 / 0.06);
+
+  --animate-fade-in: fade-in 180ms ease-out;
+  --animate-slide-up: slide-up 220ms cubic-bezier(0.2, 0.8, 0.2, 1);
+  --animate-shimmer: shimmer 1.4s linear infinite;
+}
+
+@keyframes fade-in { from { opacity: 0 } to { opacity: 1 } }
+@keyframes slide-up { from { opacity: 0; transform: translateY(8px) } to { opacity: 1; transform: none } }
+@keyframes shimmer { from { background-position: -200% 0 } to { background-position: 200% 0 } }
+
+.dark {
+  --color-bg: #0a0d16;
+  --color-surface: #11151f;
+  --color-surface-2: #171c28;
+  --color-surface-3: #212736;
+  --color-line: #232a39;
+  --color-line-strong: #2f374a;
+  --color-fg: #eceef3;
+  --color-fg-2: #a8afbf;
+  --color-fg-3: #6f7789;
+  --color-accent: var(--color-brand-500);
+  --color-accent-fg: #ffffff;
+  --color-accent-soft: color-mix(in oklab, var(--color-brand-500) 16%, transparent);
+  --color-accent-soft-fg: var(--color-brand-200);
+  --color-success: #4ade80;
+  --color-success-soft: color-mix(in oklab, #22c55e 14%, transparent);
+  --color-warning: #fbbf24;
+  --color-warning-soft: color-mix(in oklab, #f59e0b 14%, transparent);
+  --color-danger: #f87171;
+  --color-danger-soft: color-mix(in oklab, #ef4444 15%, transparent);
+  --color-info: #38bdf8;
+  --color-info-soft: color-mix(in oklab, #0ea5e9 14%, transparent);
+  --color-series-1: #3987e5;
+  --color-series-2: #d95926;
+  --color-series-3: #199e70;
+  --color-grid: #1f2533;
+  --color-axis: #2f374a;
+  --shadow-card: 0 0 0 1px rgb(255 255 255 / 0.02);
+  --shadow-pop: 0 16px 40px -8px rgb(0 0 0 / 0.6), 0 0 0 1px rgb(255 255 255 / 0.04);
+  color-scheme: dark;
+}
+
+@layer base {
+  html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; -webkit-tap-highlight-color: transparent; }
+  body {
+    @apply bg-bg text-fg font-sans antialiased;
+    font-feature-settings: 'cv11', 'ss01', 'ss03';
+    min-height: 100dvh;
+    overflow-x: hidden;
+  }
+  ::selection { background: color-mix(in oklab, var(--color-brand-500) 25%, transparent); }
+  :focus-visible { outline: 2px solid var(--color-ring); outline-offset: 2px; }
+  input, textarea, select, button { font: inherit; color: inherit; }
+  /* iOS zooms inputs below 16px; keep them at 16px on touch devices */
+  @media (pointer: coarse) { input, textarea, select { font-size: 16px !important; } }
+  img { max-width: 100%; }
+}
+
+@layer components {
+  .card { @apply bg-surface border border-line rounded-2xl; box-shadow: var(--shadow-card); }
+  .skeleton {
+    @apply rounded-md;
+    background: linear-gradient(90deg, var(--color-surface-2) 25%, var(--color-surface-3) 37%, var(--color-surface-2) 63%);
+    background-size: 400% 100%;
+    animation: var(--animate-shimmer);
+  }
+  .prose-devotion { @apply font-serif text-[1.075rem] leading-[1.8] text-fg; }
+  .prose-devotion p { @apply mb-4; }
+  .scrollbar-none { scrollbar-width: none; }
+  .scrollbar-none::-webkit-scrollbar { display: none; }
+  .pb-safe { padding-bottom: env(safe-area-inset-bottom); }
+  .pt-safe { padding-top: env(safe-area-inset-top); }
+  .tabular { font-variant-numeric: tabular-nums; }
+}
+
+@keyframes slide-in { from { transform: translateX(24px); opacity: 0 } to { transform: none; opacity: 1 } }
